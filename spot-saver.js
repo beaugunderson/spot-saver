@@ -17,7 +17,7 @@ function insert(...args) {
   fs.appendFileSync(SPOT_FILE, args.join(',') + '\n');
 }
 
-const timestamp = new Date().valueOf();
+const timestamp = response.data.time;
 
 // r is the number of recievers reporting
 // t is the number of transmitters

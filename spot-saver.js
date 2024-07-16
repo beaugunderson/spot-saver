@@ -1,23 +1,13 @@
 #!/usr/bin/env node
 
 import axios from 'axios';
-import fs from 'fs';
+import Database from 'better-sqlite3';
 
-const response = await axios.get('http://oams.space:18381/spots.json');
+const db = new Database('./spots.sqlite');
 
-const grids = response.data.data;
+db.pragma('journal_mode = wal');
 
-const SPOT_FILE = './spots.csv';
-
-if (!fs.existsSync(SPOT_FILE)) {
-  fs.writeFileSync(SPOT_FILE, 'timestamp,grid,band,r,t,rS,tS,d\n');
-}
-
-function insert(...args) {
-  fs.appendFileSync(SPOT_FILE, args.join(',') + '\n');
-}
-
-const timestamp = response.data.time;
+process.on('exit', () => db.close());
 
 // r is the number of recievers reporting
 // t is the number of transmitters
@@ -27,10 +17,42 @@ const timestamp = response.data.time;
 // tS = txSpot count, from other GT users
 // rS, tS are total counts, last 5 minutes
 
+const migrations = [
+  `CREATE TABLE IF NOT EXISTS spots (
+     timestamp INTEGER,
+
+     grid TEXT,
+     band INTEGER,
+
+     receivers INTEGER,
+     transmitters INTEGER,
+
+     receiver_spots INTEGER,
+     transmitter_spots INTEGER,
+
+     decodes INTEGER,
+
+     UNIQUE(timestamp, grid, band) ON CONFLICT REPLACE
+   )`
+];
+
+for (const statement of migrations) {
+  db.prepare(statement).run();
+}
+
+function insert(...row) {
+  db.prepare(`INSERT INTO spots
+              (timestamp, grid, band, receivers, transmitters, receiver_spots, transmitter_spots, decodes)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(row);
+}
+
+const response = await axios.get('http://oams.space:18381/spots.json');
+const grids = response.data.data;
+
 for (const grid of Object.keys(grids).sort()) {
   const bands = JSON.parse(grids[grid]);
 
   for (const band of Object.keys(bands)) {
-    insert(timestamp, grid, band, bands[band].r, bands[band].t, bands[band].rS, bands[band].tS, bands[band].d);
+    insert(response.data.time, grid, parseInt(band, 10), bands[band].r, bands[band].t, bands[band].rS, bands[band].tS, bands[band].d);
   }
 }

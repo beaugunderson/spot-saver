@@ -13,3 +13,6 @@
 .pnp.*
 spots.csv
 node_modules/
+spots.sqlite
+spots.sqlite-shm
+spots.sqlite-wal

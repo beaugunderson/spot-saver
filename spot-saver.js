@@ -10,17 +10,19 @@ const grids = response.data.data;
 const SPOT_FILE = './spots.csv';
 
 if (!fs.existsSync(SPOT_FILE)) {
-  fs.writeFileSync(SPOT_FILE, 'grid,band,r,t,rS,tS,d\n');
+  fs.writeFileSync(SPOT_FILE, 'timestamp,grid,band,r,t,rS,tS,d\n');
 }
 
 function insert(...args) {
   fs.appendFileSync(SPOT_FILE, args.join(',') + '\n');
 }
 
+const timestamp = new Date().valueOf();
+
 for (const grid of Object.keys(grids).sort()) {
   const bands = JSON.parse(grids[grid]);
 
   for (const band of Object.keys(bands)) {
-    insert(grid, band, bands[band].r, bands[band].t, bands[band].rS, bands[band].tS, bands[band].d);
+    insert(timestamp, grid, band, bands[band].r, bands[band].t, bands[band].rS, bands[band].tS, bands[band].d);
   }
 }

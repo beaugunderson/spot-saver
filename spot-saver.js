@@ -19,6 +19,14 @@ function insert(...args) {
 
 const timestamp = new Date().valueOf();
 
+// r is the number of recievers reporting
+// t is the number of transmitters
+// d is decodes
+// rS = recieverSpot count
+// the rS count, is the number of other GT users spotted by r's in that grid
+// tS = txSpot count, from other GT users
+// rS, tS are total counts, last 5 minutes
+
 for (const grid of Object.keys(grids).sort()) {
   const bands = JSON.parse(grids[grid]);
 

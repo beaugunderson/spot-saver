@@ -16,3 +16,4 @@ node_modules/
 spots.sqlite
 spots.sqlite-shm
 spots.sqlite-wal
+.env

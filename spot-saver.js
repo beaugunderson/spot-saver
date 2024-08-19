@@ -46,7 +46,7 @@ function insert(...row) {
               VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(row);
 }
 
-const response = await axios.get('http://oams.space:18381/spots.json');
+const response = await axios.get(process.env.SPOTS_URL);
 const grids = response.data.data;
 
 for (const grid of Object.keys(grids).sort()) {
